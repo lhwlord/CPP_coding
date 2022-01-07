@@ -1,0 +1,111 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+
+void solve() {
+	int n, k;
+	cin >> n >> k;
+	
+	vector<int> arr(n+1);
+    vector<vector<int>> edge(n+1);
+    vector<int> degrees(n+1,0);
+	
+	for(int i=1;i<=n;i++) 
+        cin >> arr[i];
+	
+	for(int i=0;i<k;i++) {
+        int a, b;
+		cin >> a >> b;
+		
+		edge[a].push_back(b);
+        degrees[b]++;
+    }
+	
+	int target;
+	cin >> target;
+	
+	
+    queue<int> q;
+    vector<int> answer(n+1, 0);
+    for(int i=1;i<=n;i++) {
+        if(degrees[i] == 0) {
+            q.push(i);
+            answer[i] = 0;
+        }
+    }
+	
+    while(!q.empty()) {
+        int num = q.front();
+        q.pop();
+        
+        answer[num] += arr[num];
+        
+		if(num == target) {
+			cout << answer[num]<<'\n';
+			break;
+		}
+		
+        for(int i=0;i<edge[num].size();i++){
+            int tmp = edge[num][i];
+            answer[tmp] = answer[tmp] < answer[num] ? answer[num] : answer[tmp];
+            if(--degrees[tmp] == 0) q.push(tmp);
+        }
+    }
+	
+}
+int main() {
+	ios::sync_with_stdio(false);
+    cin.tie(NULL);
+		
+    int test_case;
+    cin >> test_case;
+
+	while(test_case--)
+		solve();
+    
+    return 0;
+}
+
+* 다른 사람의 간단한 알고리즘은 무엇인지 살펴보도록 한다.
+* 문제 : 사이클 없는 그래프에서 말단부터 특정 노드까지의 최대경로
+
+노드개수 n, 연결선개수 k
+
+int벡터 arr은 n+1개(인덱스와 번호 매치용)
+int벡터의 벡터 edge n+1개
+int벡터 디그리(n+1을 0으로 초기화)
+
+1부터 n까지 arr 입력받기 : arr벡터는 처리에 걸리는 시간임
+
+0부터 k 이전까지 2개 입력받아서 edge[a]에 b를 추가, 디그리[b]++.
+-> 즉 엣지벡터는 첫 값으로 from, 둘째 값으로 to를 넣는 셈. 또한 디그리 벡터는 자신에게 들어오는 수치 값의 수를 나타낸듯.
+
+타겟 입력받기. 이건 동일.
+
+int큐 생성, int벡터 answer(n+1크기를 0으로 초기화)
+
+1부터 n까지, 디그리[i]가 0이라면 큐에 i 추가하고 answer[i]는 0
+-> 큐가 내가 쓰던 '포인터 벡터' 로 보인다. 디그리는 자신에게 들어오는 방향이고, 이게 0이라면 말단을 뜻하는 것이므로. 또한 answer[i]의 경우는, 들어오는 가중치가 0임을 뜻하는 것으로 보인다.
+
+
+
+while(큐가 비어있지 않는 한)
+->나랑 같은 알고리즘으로 보인다.
+num = 맨 앞 큐. 이후 큐 팝.
+answer[num] 에는 arr[num]을 더한다. 정황상 answer은 가중치를 더하는 곳이고, num번째 건물의 가중치를 더해놓는다고 보면 될 듯.
+
+해당 num이 타겟이라면 종료.
+
+i를 0부터 연결선 저장하던 벡터인 엣지[num] 내부 개수만큼 돌린다.
+tmp = 엣지[num][i]이다. 엣지가 향하는 목적지를 임시로 담는다.
+이후, 해당 목적지의 정답이 num의 정답보다 큰지 보고, 적당히 처리.
+이후, 디그리[tmp]에서 1 뺀 값이 0이면 q에 tmp 푸시.
+
+
+
+
+감상 : 나와 알고리즘이 동일하면서, 구조체 없이 벡터 연산만으로 훨씬 깔끔하게 짰다. 내 경우는 노드에 집중한 나머지 노드가 해당하는 수치들을 전부 갖고 있어야 한다는 느낌이 강했다면, 여기선 정보들을 종류별로 저장하면서 데이터를 처리했다. 결과적으로 이 쪽이 실행시간과 사용 메모리 측면에서 2배 수준으로 우수해졌다.
